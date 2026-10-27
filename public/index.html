@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Management System</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f3f6fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: #173b70;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        header p {
+            margin: 0;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 25px auto;
+            padding: 0 18px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            margin-bottom: 22px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #00000012;
+        }
+
+        h2 {
+            color: #173b70;
+            margin-top: 0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        input, select, button {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input, select {
+            background: white;
+        }
+
+        button {
+            border: none;
+            background: #2459a9;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #173b70;
+        }
+
+        .secondary {
+            background: #64748b;
+        }
+
+        .danger {
+            background: #b42318;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 750px;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #dbe2ea;
+            text-align: center;
+        }
+
+        th {
+            background: #eaf0f9;
+        }
+
+        .message {
+            margin: 12px 0;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #147d3f;
+        }
+
+        .error {
+            color: #b42318;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary div {
+            background: #eaf0f9;
+            padding: 18px;
+            border-radius: 8px;
+        }
+
+        .summary strong {
+            display: block;
+            font-size: 24px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 18px 10px;
+            }
+
+            header h1 {
+                font-size: 23px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .form-row input,
+            .form-row select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Student Attendance Management System</h1>
+    <p>Seven-Period Attendance | Monthly Reports</p>
+</header>
+
+<main>
+    <section class="card">
+        <h2>Student Management</h2>
+
+        <form id="studentForm">
+            <div class="form-row">
+                <input id="rollNumber" placeholder="Roll Number" required>
+                <input id="studentName" placeholder="Student Name" required>
+                <input id="department" placeholder="Department" required>
+                <button type="submit">Add Student</button>
+            </div>
+        </form>
+
+        <div id="studentMessage" class="message" role="status"></div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                    </tr>
+                </thead>
+                <tbody id="studentList"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Daily Attendance</h2>
+
+        <div class="form-row">
+            <label>
+                Attendance Date:
+                <input type="date" id="attendanceDate">
+            </label>
+            <button type="button" id="loadAttendance">Load Attendance</button>
+            <button type="button" id="markAllPresent">Mark All Present</button>
+            <button type="button" id="markAllAbsent" class="danger">Mark All Absent</button>
+        </div>
+
+        <p>Select Present or Absent for each period, then click Save Attendance.</p>
+
+        <div id="attendanceMessage" class="message" role="status"></div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Period 1</th>
+                        <th>Period 2</th>
+                        <th>Period 3</th>
+                        <th>Period 4</th>
+                        <th>Period 5</th>
+                        <th>Period 6</th>
+                        <th>Period 7</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceList"></tbody>
+            </table>
+        </div>
+
+        <br>
+        <button type="button" id="saveAttendance">Save Attendance</button>
+    </section>
+
+    <section class="card">
+        <h2>Monthly Attendance Report</h2>
+
+        <div class="form-row">
+            <label>
+                Select Month:
+                <input type="month" id="reportMonth">
+            </label>
+            <button type="button" id="generateReport">Generate Report</button>
+            <button type="button" id="exportReport" class="secondary">Export CSV</button>
+        </div>
+
+        <div id="reportMessage" class="message" role="status"></div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Student Name</th>
+                        <th>Recorded Periods</th>
+                        <th>Attended</th>
+                        <th>Absent</th>
+                        <th>Attendance %</th>
+                    </tr>
+                </thead>
+                <tbody id="reportList"></tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script>
+    const $ = id => document.getElementById(id);
+
+    let students = [];
+    let attendanceRows = [];
+    let reportGenerated = false;
+
+    function showMessage(id, message, isError = false) {
+        const element = $(id);
+        element.textContent = message;
+        element.className = "message " + (isError ? "error" : "success");
+    }
+
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...options.headers
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Request failed");
+        }
+
+        return data;
+    }
+
+    function todayString() {
+        const now = new Date();
+        const localDate = new Date(
+            now.getTime() - now.getTimezoneOffset() * 60000
+        );
+        return localDate.toISOString().slice(0, 10);
+    }
+
+    function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, char => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#39;"
+        })[char]);
+    }
+
+    async function loadStudents() {
+        students = await api("/api/students");
+
+        $("studentList").innerHTML = students.map(student => `
+            <tr>
+                <td>${escapeHtml(student.roll_number)}</td>
+                <td>${escapeHtml(student.name)}</td>
+                <td>${escapeHtml(student.department)}</td>
+            </tr>
+        `).join("");
+
+        if (students.length === 0) {
+            $("studentList").innerHTML =
+                '<tr><td colspan="3">No students added yet.</td></tr>';
+        }
+    }
+
+    $("studentForm").addEventListener("submit", async event => {
+        event.preventDefault();
+
+        try {
+            await api("/api/students", {
+                method: "POST",
+                body: JSON.stringify({
+                    roll_number: $("rollNumber").value.trim(),
+                    name: $("studentName").value.trim(),
+                    department: $("department").value.trim()
+                })
+            });
+
+            $("studentForm").reset();
+            await loadStudents();
+            showMessage("studentMessage", "Student added successfully.");
+        } catch (error) {
+            showMessage("studentMessage", error.message, true);
+        }
+    });
+
+    async function loadAttendance() {
+        try {
+            const date = $("attendanceDate").value;
+
+            if (!date) {
+                throw new Error("Please select an attendance date.");
+            }
+
+            const records = await api(
+                "/api/attendance?date=" + encodeURIComponent(date)
+            );
+
+            const saved = new Map();
+
+            records.forEach(record => {
+                if (record.period) {
+                    saved.set(
+                        `${record.student_id}-${record.period}`,
+                        record.status
+                    );
+                }
+            });
+
+            attendanceRows = students.map(student => ({
+                student,
+                statuses: Array.from({ length: 7 }, (_, index) =>
+                    saved.get(`${student.id}-${index + 1}`) || ""
+                )
+            }));
+
+            renderAttendance();
+            showMessage("attendanceMessage", "Attendance list loaded.");
+        } catch (error) {
+            showMessage("attendanceMessage", error.message, true);
+        }
+    }
+
+    function renderAttendance() {
+        $("attendanceList").innerHTML = attendanceRows.map((row, index) => `
+            <tr>
+                <td>${escapeHtml(row.student.roll_number)}</td>
+                <td>${escapeHtml(row.student.name)}</td>
+                ${row.statuses.map((status, periodIndex) => `
+                    <td>
+                        <select
+                            aria-label="Period ${periodIndex + 1} for ${escapeHtml(row.student.name)}"
+                            data-row="${index}"
+                            data-period="${periodIndex}"
+                        >
+                            <option value="" ${status === "" ? "selected" : ""}>Select</option>
+                            <option value="Present" ${status === "Present" ? "selected" : ""}>Present</option>
+                            <option value="Absent" ${status === "Absent" ? "selected" : ""}>Absent</option>
+                        </select>
+                    </td>
+                `).join("")}
+            </tr>
+        `).join("");
+
+        $("attendanceList").querySelectorAll("select").forEach(select => {
+            select.addEventListener("change", event => {
+                const row = Number(event.target.dataset.row);
+                const period = Number(event.target.dataset.period);
+                attendanceRows[row].statuses[period] = event.target.value;
+            });
+        });
+
+        if (attendanceRows.length === 0) {
+            $("attendanceList").innerHTML =
+                '<tr><td colspan="9">Add students before marking attendance.</td></tr>';
+        }
+    }
+
+    function markAll(status) {
+        attendanceRows.forEach(row => {
+            row.statuses = Array(7).fill(status);
+        });
+
+        renderAttendance();
+    }
+
+    $("markAllPresent").addEventListener("click", () => markAll("Present"));
+    $("markAllAbsent").addEventListener("click", () => markAll("Absent"));
+    $("loadAttendance").addEventListener("click", loadAttendance);
+
+    $("saveAttendance").addEventListener("click", async () => {
+        try {
+            const date = $("attendanceDate").value;
+
+            if (!date) {
+                throw new Error("Please select an attendance date.");
+            }
+
+            const pending = [];
+
+            attendanceRows.forEach(row => {
+                row.statuses.forEach((status, index) => {
+                    if (status) {
+                        pending.push({
+                            student_id: row.student.id,
+                            attendance_date: date,
+                            period: index + 1,
+                            status
+                        });
+                    }
+                });
+            });
+
+            if (pending.length === 0) {
+                throw new Error("Mark attendance for at least one period.");
+            }
+
+            const results = await Promise.allSettled(
+                pending.map(record => api("/api/attendance", {
+                    method: "POST",
+                    body: JSON.stringify(record)
+                }))
+            );
+
+            const failed = results.filter(result =>
+                result.status === "rejected"
+            );
+
+            if (failed.length) {
+                await loadAttendance();
+
+                throw new Error(
+                    `${pending.length - failed.length} records saved; ` +
+                    `${failed.length} failed. ${failed[0].reason.message} ` +
+                    `Reloaded attendance to show saved records.`
+                );
+            }
+
+            showMessage(
+                "attendanceMessage",
+                `${pending.length} attendance records saved successfully.`
+            );
+
+            await loadAttendance();
+        } catch (error) {
+            showMessage("attendanceMessage", error.message, true);
+        }
+    });
+
+    async function generateReport() {
+        try {
+            const month = $("reportMonth").value;
+
+            if (!month) {
+                throw new Error("Please select a month.");
+            }
+
+            const reports = await api(
+                "/api/reports/monthly?month=" + encodeURIComponent(month)
+            );
+
+            $("reportList").innerHTML = reports.map(report => `
+                <tr>
+                    <td>${escapeHtml(report.roll_number)}</td>
+                    <td>${escapeHtml(report.name)}</td>
+                    <td>${report.working_periods}</td>
+                    <td>${report.periods_attended}</td>
+                    <td>${report.periods_absent}</td>
+                    <td>${report.attendance_percentage == null
+                        ? "N/A"
+                        : report.attendance_percentage + "%"}</td>
+                </tr>
+            `).join("");
+
+            if (!reports.length) {
+                $("reportList").innerHTML =
+                    '<tr><td colspan="6">No students found.</td></tr>';
+            }
+
+            reportGenerated = true;
+            showMessage("reportMessage", "Monthly report generated.");
+        } catch (error) {
+            reportGenerated = false;
+            showMessage("reportMessage", error.message, true);
+        }
+    }
+
+    $("generateReport").addEventListener("click", generateReport);
+
+    $("exportReport").addEventListener("click", () => {
+        const month = $("reportMonth").value;
+
+        if (!month) {
+            showMessage("reportMessage", "Please select a month.", true);
+            return;
+        }
+
+        window.location.href =
+            "/api/reports/monthly.csv?month=" + encodeURIComponent(month);
+    });
+
+    $("attendanceDate").value = todayString();
+    $("reportMonth").value = todayString().slice(0, 7);
+
+    loadStudents()
+        .then(loadAttendance)
+        .catch(error => showMessage("studentMessage", error.message, true));
+</script>
+
+</body>
+</html>

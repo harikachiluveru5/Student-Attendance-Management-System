@@ -1,0 +1,5 @@
+node_modules/
+attendance.db
+.env
+.DS_Store
+npm-debug.log*
